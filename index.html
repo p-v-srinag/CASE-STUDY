@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maersk Q2 2025 Case Study</title>
-    <link rel="icon" href="data:,"> <!-- Fixes favicon 404 error -->
+    <link rel="icon" href="data:,">
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -13,7 +13,7 @@
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- PDF.js (Stable Version) -->
+    <!-- PDF.js (Stable Version 2.16.105) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     
     <script>
@@ -101,7 +101,7 @@
         }
         canvas { display: block; }
 
-        /* HIGHLIGHTER STYLE */
+        /* HIGHLIGHTER STYLE - Neon Look */
         .highlight-box {
             position: absolute;
             background-color: rgba(255, 255, 0, 0.35); 
@@ -216,6 +216,7 @@
                 if (!fileUrl) return;
                 const loadPdf = async () => {
                     try {
+                        // Pass URL directly to support both local blob and relative paths
                         const loadingTask = window.pdfjsLib.getDocument(fileUrl);
                         const doc = await loadingTask.promise;
                         setPdfDoc(doc);
@@ -279,8 +280,8 @@
             const [totalPages, setTotalPages] = useState(0);
             const [activeHighlight, setActiveHighlight] = useState(null);
             
-            // FIX: Construct an ABSOLUTE URL based on the current location
-            // This ensures it works whether you are on localhost or username.github.io/repo/
+            // Dynamic Absolute Path Construction
+            // This solves the 404 error on GitHub Pages by forcing the correct root
             const [pdfUrl, setPdfUrl] = useState(() => {
                 try {
                     return new URL("Report.pdf", window.location.href).href;
@@ -291,11 +292,11 @@
             
             const [loadError, setLoadError] = useState(false);
             const [scale, setScale] = useState(1.5);
-            
             const [chatInput, setChatInput] = useState("");
             const [messages, setMessages] = useState([]);
             const chatEndRef = useRef(null);
 
+            // Adjusted Highlight Coordinates (Left alignment fixed)
             const highlights = {
                 1: { page: 3, rect: { top: '28.3%', left: '6.5%', width: '86%', height: '6.5%' } },
                 2: { page: 5, rect: { top: '22.8%', left: '6.5%', width: '89%', height: '8.5%' } },
