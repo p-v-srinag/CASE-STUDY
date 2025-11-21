@@ -1,16 +1,45 @@
-# React + Vite
+# **Maersk Financial Case Study (Q2 2025)**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## **Project Overview**
 
-Currently, two official plugins are available:
+This is a **frontend case study application** that presents an interactive financial analysis of the **Maersk Q2 2025 Interim Report**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The application features a **split-screen layout**:
 
-## React Compiler
+- **Left Panel:** Displays the official PDF report.  
+- **Right Panel:** Shows a financial analysis of the report's data.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### **Key Feature**
+Interactive citations (e.g., **[1], [2], [3]**) inside the analysis text automatically:
+- Navigate the PDF viewer to the exact referenced page.
+- Highlight the relevant supporting text in the PDF.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## **Features**
+
+- **Interactive PDF Viewer:** Seamlessly navigates to specific pages and sections.
+- **Smart Highlighting:** Neon-style animated highlight boxes over exact text matches.
+- **Dual Pane Layout:** Optimized for reading and cross-referencing financial data.
+- **Simulated Chat:** Demonstrates how an AI assistant might answer questions about the report.
+- **Zoom Controls:** Zoom in/out of the PDF document.
+- **Responsive Design:** Adjusts layout for desktop and mobile.
+- **Zero-Build Deployment:** Entirely browser-based; single-file React + Babel architecture.
+
+---
+
+## **Technologies Used**
+
+- **React** – UI components  
+- **PDF.js** – Client-side PDF rendering  
+- **CSS3** – Dark-mode design & highlight animations  
+- **Babel (Standalone)** – In-browser JSX compilation (no bundlers)  
+
+---
+
+## **How to Run Locally**
+
+### **1. Clone the Repository**
+```bash
+git clone https://github.com/your-username/maersk-case-study.git
+cd maersk-case-study
