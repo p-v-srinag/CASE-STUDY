@@ -37,6 +37,11 @@ Interactive citations (e.g., **[1], [2], [3]**) inside the analysis text automat
 
 ---
 
+## **Output**
+
+<img width="1699" height="935" alt="image" src="https://github.com/user-attachments/assets/43af1e2e-867f-487e-861a-d1c4db30edae" />
+<img width="1710" height="953" alt="Screenshot 2025-11-21 at 19 25 39" src="https://github.com/user-attachments/assets/f5e9c737-d58b-4018-8e5a-ad22422e0d88" />
+
 ## **How to Run Locally**
 
 ### **1. Clone the Repository**
