@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maersk Q2 2025 Case Study</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- PDF.js (Version 2.16.105 - Stable) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    
+    <script>
+        // Initialize Worker
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    </script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #111827;
+            color: #e5e7eb;
+            overflow: hidden;
+        }
+        .app-container { display: flex; height: 100vh; width: 100vw; }
+
+        /* LEFT PANEL */
+        .pdf-panel {
+            width: 50%;
+            height: 100%;
+            background-color: #6b7280;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* PDF CONTROLS */
+        .pdf-controls {
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 1rem;
+            z-index: 20;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .nav-btn {
+            background: #374151;
+            border: none;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-btn:hover { background: #4b5563; }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* PDF CANVAS WRAPPER */
+        .pdf-viewer-container {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            position: relative;
+        }
+        .pdf-wrapper {
+            position: relative;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            background-color: white;
+            align-self: flex-start;
+        }
+        canvas { display: block; max-width: 100%; height: auto; }
+
+        /* HIGHLIGHTER */
+        .highlight-box {
+            position: absolute;
+            background-color: rgba(253, 224, 71, 0.5);
+            mix-blend-mode: multiply;
+            border-bottom: 2px solid #ca8a04;
+            z-index: 10;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(253, 224, 71, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0); }
+        }
+
+        /* RIGHT PANEL */
+        .sidebar-panel {
+            width: 50%;
+            height: 100%;
+            background-color: #111827;
+            padding: 2rem;
+            overflow-y: auto;
+            border-left: 1px solid #374151;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px; /* Prevent scrollbar overlap */
+        }
+        .card {
+            background-color: #1f2937;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #374151;
+            margin-bottom: 1.5rem;
+        }
+        .text-blue { color: #60a5fa; }
+        .text-emerald { color: #34d399; }
+        .citation-btn {
+            display: inline-block;
+            margin-left: 0.3rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+        .btn-blue { background-color: #2563eb; }
+        .btn-emerald { background-color: #059669; }
+        
+        .upload-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            text-align: center;
+        }
+        .upload-btn {
+            margin-top: 1rem; padding: 0.75rem 1.5rem; background-color: #2563eb;
+            color: white; border-radius: 0.5rem; cursor: pointer; font-weight: bold;
+        }
+        .evidence-row {
+            cursor: pointer; padding: 8px; border-radius: 4px; display: flex; align-items: center;
+        }
+        .evidence-row:hover { background-color: #374151; }
+        
+        /* CHAT AREA */
+        .chat-section {
+            margin-top: 20px;
+            border-top: 1px solid #374151;
+            padding-top: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-history {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .message {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            max-width: 85%;
+            line-height: 1.4;
+        }
+        .message.user {
+            align-self: flex-end;
+            background-color: #2563eb;
+            color: white;
+        }
+        .message.ai {
+            align-self: flex-start;
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+        .chat-input {
+            width: 100%; background-color: #1f2937; color: white; padding: 0.75rem;
+            border-radius: 0.375rem; border: 1px solid #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // PDF Viewer Component
+        const PdfViewer = ({ fileUrl, pageNumber, highlightRect, setTotalPages, onError }) => {
+            const canvasRef = useRef(null);
+            const [pdfDoc, setPdfDoc] = useState(null);
+            const [pageRendering, setPageRendering] = useState(false);
+
+            useEffect(() => {
+                if (!fileUrl) return;
+                
+                const loadPdf = async () => {
+                    try {
+                        const loadingTask = window.pdfjsLib.getDocument(fileUrl);
+                        const doc = await loadingTask.promise;
+                        setPdfDoc(doc);
+                        setTotalPages(doc.numPages);
+                    } catch (err) {
+                        console.error("PDF Load Error:", err);
+                        if (onError) onError(err);
+                    }
+                };
+                loadPdf();
+            }, [fileUrl]);
+
+            useEffect(() => {
+                if (!pdfDoc || !canvasRef.current) return;
+
+                const renderPage = async () => {
+                    try {
+                        setPageRendering(true);
+                        const page = await pdfDoc.getPage(pageNumber);
+                        const viewport = page.getViewport({ scale: 1.2 });
+                        const canvas = canvasRef.current;
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        const renderContext = { canvasContext: context, viewport: viewport };
+                        await page.render(renderContext).promise;
+                        setPageRendering(false);
+                    } catch (err) {
+                        console.error("Render Error:", err);
+                        setPageRendering(false);
+                    }
+                };
+                renderPage();
+            }, [pdfDoc, pageNumber]);
+
+            return (
+                <div className="pdf-wrapper">
+                    <canvas ref={canvasRef} />
+                    {highlightRect && !pageRendering && (
+                        <div 
+                            className="highlight-box"
+                            style={{
+                                top: highlightRect.top,
+                                left: highlightRect.left,
+                                width: highlightRect.width,
+                                height: highlightRect.height
+                            }}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [pageNumber, setPageNumber] = useState(1);
+            const [totalPages, setTotalPages] = useState(0);
+            const [activeHighlight, setActiveHighlight] = useState(null);
+            const [pdfUrl, setPdfUrl] = useState("Report.pdf"); 
+            const [loadError, setLoadError] = useState(false);
+            
+            // Chat State
+            const [chatInput, setChatInput] = useState("");
+            const [messages, setMessages] = useState([]);
+            const chatEndRef = useRef(null);
+
+            // Highlight Coordinates
+            const highlights = {
+                1: { page: 3, rect: { top: '28.5%', left: '10%', width: '82%', height: '6%' } },
+                2: { page: 5, rect: { top: '23%', left: '10%', width: '85%', height: '8%' } },
+                3: { page: 15, rect: { top: '23.6%', left: '11.5%', width: '42%', height: '1.8%' } }
+            };
+
+            const handleCitationClick = (id) => {
+                if (highlights[id]) {
+                    setActiveHighlight(highlights[id].rect);
+                    setPageNumber(highlights[id].page);
+                }
+            };
+
+            const handleFileUpload = (e) => {
+                if (e.target.files[0]) {
+                    setPdfUrl(URL.createObjectURL(e.target.files[0]));
+                    setLoadError(false);
+                    setActiveHighlight(null);
+                    setPageNumber(1);
+                }
+            };
+
+            const changePage = (offset) => {
+                const newPage = pageNumber + offset;
+                if (newPage >= 1 && newPage <= totalPages) {
+                    setPageNumber(newPage);
+                    const isHighlightPage = Object.values(highlights).some(h => h.page === newPage);
+                    if (!isHighlightPage) setActiveHighlight(null);
+                }
+            };
+
+            // Auto-scroll to bottom of chat
+            useEffect(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, [messages]);
+
+            const handleChatSubmit = (e) => {
+                if (e.key === 'Enter' && chatInput.trim()) {
+                    const userMsg = { text: chatInput, sender: 'user' };
+                    setMessages(prev => [...prev, userMsg]);
+                    setChatInput("");
+
+                    // Simulate AI Response
+                    setTimeout(() => {
+                        const aiMsg = { 
+                            text: "I analyzed the report. Based on the data, EBITDA improvements are indeed driven by operational performance rather than one-offs.", 
+                            sender: 'ai' 
+                        };
+                        setMessages(prev => [...prev, aiMsg]);
+                    }, 800);
+                }
+            };
+
+            return (
+                <div className="app-container">
+                    
+                    <div className="pdf-panel">
+                        {loadError ? (
+                            <div className="upload-screen">
+                                <h2>PDF Auto-Load Failed</h2>
+                                <p style={{color: '#9ca3af', margin: '10px 0'}}>Could not load <strong>Report.pdf</strong> directly.</p>
+                                <label className="upload-btn">
+                                    Select PDF File
+                                    <input type="file" accept="application/pdf" onChange={handleFileUpload} style={{display: 'none'}} />
+                                </label>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="pdf-controls">
+                                    <button className="nav-btn" onClick={() => changePage(-1)} disabled={pageNumber <= 1}>Previous</button>
+                                    <span>Page {pageNumber} of {totalPages || '--'}</span>
+                                    <button className="nav-btn" onClick={() => changePage(1)} disabled={pageNumber >= totalPages}>Next</button>
+                                </div>
+                                <div className="pdf-viewer-container">
+                                    <PdfViewer 
+                                        fileUrl={pdfUrl}
+                                        pageNumber={pageNumber}
+                                        highlightRect={
+                                            Object.values(highlights).some(h => h.page === pageNumber && JSON.stringify(h.rect) === JSON.stringify(activeHighlight)) 
+                                            ? activeHighlight 
+                                            : null
+                                        }
+                                        setTotalPages={setTotalPages}
+                                        onError={() => setLoadError(true)}
+                                    />
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="sidebar-panel">
+                        <div className="content-scroll">
+                            <div style={{borderBottom:'1px solid #374151', marginBottom:'20px', paddingBottom:'10px'}}>
+                                <h1 style={{color:'white', fontSize:'1.5rem'}}>Financials</h1>
+                                <p style={{color:'#9ca3af'}}>Analysis</p>
+                            </div>
+
+                            <div className="card">
+                                <p style={{marginBottom: '1rem', lineHeight:'1.6'}}>
+                                    No extraordinary or one-off items affecting EBITDA were reported in Maersk's Q2 2025 results. The report explicitly notes that EBITDA improvements stemmed from operational performance— including volume growth, cost control, and margin improvement across Ocean, Logistics & Services, and Terminals segments 
+                                    <button onClick={() => handleCitationClick(1)} className="citation-btn btn-blue">[1]</button>
+                                    <button onClick={() => handleCitationClick(2)} className="citation-btn btn-blue">[2]</button>
+                                </p>
+                                <p style={{marginBottom: '1rem', lineHeight:'1.6'}}>
+                                    Gains or losses from asset sales, which could qualify as extraordinary items, are shown separately under EBIT and not included in EBITDA. The gain on sale of non-current assets was USD 25 m in Q2 2025, significantly lower than USD 208 m in Q2 2024, but these affect EBIT, not EBITDA
+                                    <button onClick={() => handleCitationClick(3)} className="citation-btn btn-emerald">[3]</button>
+                                </p>
+                                <p style={{lineHeight:'1.6'}}>Hence, Q2 2025 EBITDA reflects core operating activities without one-off extraordinary adjustments.</p>
+                            </div>
+
+                            <div className="card">
+                                <span style={{color:'#34d399', fontWeight:'bold', display:'block', marginBottom:'10px'}}>Findings</span>
+                                <div style={{marginBottom: '1.5rem'}}>
+                                    <strong style={{display:'block', marginBottom:'5px', color:'white'}}>Page 3 - Highlights Q2 2025</strong>
+                                    <p>EBITDA increase (USD 2.3 bn vs USD 2.1 bn prior year) attributed to operational improvements; no mention of extraordinary or one-off items.<button onClick={() => handleCitationClick(1)} className="citation-btn btn-blue">[1]</button></p>
+                                </div>
+                                <div style={{marginBottom: '1.5rem'}}>
+                                    <strong style={{display:'block', marginBottom:'5px', color:'white'}}>Page 5 - Review Q2 2025</strong>
+                                    <p>EBITDA rise driven by higher revenue and cost control across all segments; no extraordinary gains or losses included.<button onClick={() => handleCitationClick(2)} className="citation-btn btn-blue">[2]</button></p>
+                                </div>
+                                <div>
+                                    <strong style={{display:'block', marginBottom:'5px', color:'white'}}>Page 15 - Condensed Income Statement</strong>
+                                    <div style={{background:'#111827', padding:'10px', borderLeft:'4px solid #10b981', color:'#9ca3af', fontStyle:'italic'}}>
+                                        "Gain on sale of non-current assets USD 25 m (vs USD 208 m prior year) reported separately below EBITDA; therefore, not part of EBITDA."<button onClick={() => handleCitationClick(3)} className="citation-btn btn-emerald">[3]</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{marginTop:'30px', paddingTop:'15px', borderTop:'1px solid #374151'}}>
+                                <h3 style={{fontSize:'0.75rem', color:'#6b7280', marginBottom:'10px'}}>SUPPORTING EVIDENCE</h3>
+                                <div className="evidence-row" onClick={() => handleCitationClick(1)}>
+                                    <span className="text-blue" style={{marginRight:'10px', fontFamily:'monospace'}}>[1]</span>
+                                    <span>A.P. Moller - Maersk Q2 2025 Interim Report - Page 3</span>
+                                </div>
+                                <div className="evidence-row" onClick={() => handleCitationClick(2)}>
+                                    <span className="text-blue" style={{marginRight:'10px', fontFamily:'monospace'}}>[2]</span>
+                                    <span>A.P. Moller - Maersk Q2 2025 Interim Report - Page 5</span>
+                                </div>
+                                <div className="evidence-row" onClick={() => handleCitationClick(3)}>
+                                    <span className="text-emerald" style={{marginRight:'10px', fontFamily:'monospace'}}>[3]</span>
+                                    <span>A.P. Moller - Maersk Q2 2025 Interim Report - Page 15</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="chat-section">
+                            <div className="chat-history">
+                                {messages.map((msg, index) => (
+                                    <div key={index} className={`message ${msg.sender}`}>
+                                        {msg.text}
+                                    </div>
+                                ))}
+                                <div ref={chatEndRef} />
+                            </div>
+                            <input 
+                                type="text" 
+                                placeholder="Ask about your chat data..." 
+                                className="chat-input"
+                                value={chatInput}
+                                onChange={(e) => setChatInput(e.target.value)}
+                                onKeyDown={handleChatSubmit}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
+}
+
+/* --- MAIN CONTAINER --- */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* --- LEFT PANEL (PDF) --- */
+.pdf-panel {
+  width: 50%;
+  height: 100%;
+  background-color: #6b7280;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.pdf-wrapper {
+  position: relative;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Hide React-PDF text layer to prevent cursor interference */
+.react-pdf__Page__textContent, 
+.react-pdf__Page__annotationLayer {
+  display: none !important;
+}
+
+/* --- YELLOW HIGHLIGHT OVERLAY --- */
+.highlight-box {
+  position: absolute;
+  background-color: rgba(253, 224, 71, 0.6);
+  mix-blend-mode: multiply;
+  border-bottom: 2px solid #ca8a04;
+  transition: all 0.3s ease;
+  z-index: 10;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(253, 224, 71, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0); }
+}
+
+/* --- RIGHT PANEL (CONTENT) --- */
+.sidebar-panel {
+  width: 50%;
+  height: 100%;
+  background-color: #111827; /* Dark theme */
+  color: #d1d5db;
+  padding: 2rem;
+  overflow-y: auto;
+  border-left: 1px solid #374151;
+}
+
+.header {
+  border-bottom: 1px solid #374151;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Card Styles */
+.card {
+  background-color: #1f2937;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.text-blue { color: #60a5fa; }
+.text-emerald { color: #34d399; }
+
+/* Citation Buttons ([1], [3]) */
+.citation-btn {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.btn-blue { background-color: #2563eb; }
+.btn-blue:hover { background-color: #1d4ed8; }
+
+.btn-emerald { background-color: #059669; }
+.btn-emerald:hover { background-color: #047857; }
+
+/* Quote Block */
+.quote-block {
+  background-color: #111827;
+  padding: 0.75rem;
+  border-left: 4px solid #10b981; /* Emerald border */
+  margin-bottom: 1rem;
+  font-style: italic;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+/* Hover Effects */
+.hover-text:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Chat Input */
+.input-wrapper {
+  position: relative;
+  margin-top: 3rem;
+}
+
+.chat-input {
+  width: 100%;
+  background-color: #1f2937;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #4b5563;
+  outline: none;
+}
+
+.chat-input:focus {
+  border-color: #3b82f6;
+}
