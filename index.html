@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maersk Q2 2025 Case Study</title>
+    <link rel="icon" href="data:,"> <!-- Fixes favicon 404 error -->
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -88,7 +89,7 @@
             width: 100%;
             display: flex;
             justify-content: center;
-            overflow: auto; /* Allow scrolling both ways if zoomed in */
+            overflow: auto; 
             position: relative;
         }
         .pdf-wrapper {
@@ -96,7 +97,7 @@
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
             background-color: white;
             align-self: flex-start;
-            transition: transform 0.1s ease-out; /* Smooth zoom feel */
+            transition: transform 0.1s ease-out; 
         }
         canvas { display: block; }
 
@@ -108,7 +109,6 @@
             mix-blend-mode: multiply; 
             z-index: 10;
             pointer-events: none;
-            /* Neon Glow Effect */
             box-shadow: 0 0 6px rgba(255, 235, 59, 0.8), inset 0 0 4px rgba(255, 255, 0, 0.5);
             border: 2px solid rgba(255, 215, 0, 0.8);
             animation: pulse-glow 3s infinite ease-in-out;
@@ -234,8 +234,6 @@
                     try {
                         setPageRendering(true);
                         const page = await pdfDoc.getPage(pageNumber);
-                        
-                        // Use dynamic scale prop
                         const viewport = page.getViewport({ scale: scale });
                         const canvas = canvasRef.current;
                         const context = canvas.getContext('2d');
@@ -256,7 +254,7 @@
                     }
                 };
                 renderPage();
-            }, [pdfDoc, pageNumber, scale]); // Re-render when scale changes
+            }, [pdfDoc, pageNumber, scale]);
 
             return (
                 <div className="pdf-wrapper">
@@ -280,21 +278,27 @@
             const [pageNumber, setPageNumber] = useState(1);
             const [totalPages, setTotalPages] = useState(0);
             const [activeHighlight, setActiveHighlight] = useState(null);
-            const [pdfUrl, setPdfUrl] = useState("Report.pdf"); 
+            
+            // FIX: Construct an ABSOLUTE URL based on the current location
+            // This ensures it works whether you are on localhost or username.github.io/repo/
+            const [pdfUrl, setPdfUrl] = useState(() => {
+                try {
+                    return new URL("Report.pdf", window.location.href).href;
+                } catch(e) {
+                    return "Report.pdf";
+                }
+            });
+            
             const [loadError, setLoadError] = useState(false);
-            const [scale, setScale] = useState(1.5); // Zoom State
+            const [scale, setScale] = useState(1.5);
             
             const [chatInput, setChatInput] = useState("");
             const [messages, setMessages] = useState([]);
             const chatEndRef = useRef(null);
 
-            // Adjusted Coordinates: Shifted 'left' lower to start at beginning of line
             const highlights = {
-                // Page 3
                 1: { page: 3, rect: { top: '28.3%', left: '6.5%', width: '86%', height: '6.5%' } },
-                // Page 5
                 2: { page: 5, rect: { top: '22.8%', left: '6.5%', width: '89%', height: '8.5%' } },
-                // Page 15
                 3: { page: 15, rect: { top: '23.4%', left: '6.5%', width: '50%', height: '2.2%' } }
             };
 
@@ -350,8 +354,9 @@
                             <div className="upload-screen">
                                 <h2>PDF Auto-Load Failed</h2>
                                 <p style={{color: '#9ca3af', margin: '10px 0'}}>Could not load <strong>Report.pdf</strong>.</p>
+                                <p style={{color: '#6b7280', fontSize:'0.8rem', marginBottom:'20px'}}>Ensure 'Report.pdf' is in the same GitHub folder.</p>
                                 <label className="upload-btn">
-                                    Select PDF File
+                                    Select PDF Manually
                                     <input type="file" accept="application/pdf" onChange={handleFileUpload} style={{display: 'none'}} />
                                 </label>
                             </div>
@@ -361,10 +366,7 @@
                                     <button className="nav-btn" onClick={() => changePage(-1)} disabled={pageNumber <= 1}>Prev</button>
                                     <span>Page {pageNumber} / {totalPages || '--'}</span>
                                     <button className="nav-btn" onClick={() => changePage(1)} disabled={pageNumber >= totalPages}>Next</button>
-                                    
-                                    {/* Vertical Separator */}
                                     <div style={{width: '1px', height: '20px', background: '#666', margin: '0 5px'}}></div>
-                                    
                                     <button className="zoom-btn" onClick={zoomOut} title="Zoom Out">-</button>
                                     <span style={{minWidth:'40px', textAlign:'center'}}>{Math.round(scale * 100)}%</span>
                                     <button className="zoom-btn" onClick={zoomIn} title="Zoom In">+</button>
